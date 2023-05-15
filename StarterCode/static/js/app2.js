@@ -104,8 +104,6 @@ function updateData() {
             choicemetadata.appendChild(el)
         };
 
-
-        console.log(otuids)
         let barData = [
             {
                 x: samplevaluesdes,
