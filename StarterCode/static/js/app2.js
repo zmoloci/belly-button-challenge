@@ -35,9 +35,18 @@ function updateData() {
     let dropdownMenu = d3.select("#selDataset")
     let dataName = dropdownMenu.property("value");
     let samplevalues = []
+    
+    // build metadata dictionary
+    let choicemeta = {}
+
     let otuids = []
+
     let otulabels = []
     let id_choice = dataName
+
+    // define variables for descending bar chart
+    let samplevaluesdes = []
+    let otuidsbar = []
 
 
     d3.json(baseURL).then(function (data) {
@@ -48,55 +57,92 @@ function updateData() {
                 console.log(data.samples[i])
                 for (j = 0; j < 11; j++) {
                     if (data.samples[i].sample_values[j]) {
+                        // append sample_values to samplevalues array
                         samplevalues.push(data.samples[i].sample_values[j])
+                        // append sample_values to end of samplevaluesdes array
+                        samplevaluesdes.unshift(data.samples[i].sample_values[j])
                     }
                     if (data.samples[i].otu_ids[j]) {
-                        otuids.push("OTU " + data.samples[i].otu_ids[j])
+                        // append otu_id to end of otuids array
+                        otuids.push(data.samples[i].otu_ids[j])
+                        // append otu_id to beginning of otuidsbar array
+                        otuidsbar.unshift("OTU " + data.samples[i].otu_ids[j])
                     }
                     if (data.samples[i].otu_labels[j]) {
+                        // append otu_labels to otulabels array
                         otulabels.push(data.samples[i].otu_labels[j])
                     }
+                }
+                if (data.metadata[i].id = id_choice){
+                    // choicemeta.push(data.metadata[i])
+                    choicemeta.age = data.metadata[i]["age"]
+                    choicemeta.bbytype = data.metadata[i]["bbtype"]
+                    choicemeta.ethnicity = data.metadata[i]["ethnicity"]
+                    choicemeta.gender = data.metadata[i]["gender"]
+                    choicemeta.id = data.metadata[i]["id"]
+                    choicemeta.location = data.metadata[i]["location"] 
+                    choicemeta.wfreq = data.metadata[i]["wfreq"]
                 }
             }
         }
         console.log(samplevalues)
         console.log(otuids)
         console.log(otulabels)
-        return [samplevalues, otuids, otulabels]
+        console.log(samplevaluesdes)
+        console.log(choicemeta[2])
+        return [samplevalues, otuids, otulabels,samplevaluesdes,choicemeta]
 
-    }).then(function ([samplevalues, otuids, otulabels]) {
+    }).then(function ([samplevalues, otuids, otulabels,samplevaluesdes,choicemeta]) {
+        
+        // metadata section - probably should be moved into earlier section --- IN PROGRESS
+        var choicemetadata = document.getElementById("sample-metadata")
+        for (j = 0; j < 7; j++) {
+            var opt = choicemeta[j] + "is cool";
+            var el = document.createElement("ul");
+            el.textContent = opt;
+            el.value = opt;
+            choicemetadata.appendChild(el)
+        };
+
+
         console.log(otuids)
         let barData = [
             {
-                x: samplevalues,
-                y: otuids,
+                x: samplevaluesdes,
+                y: otuidsbar,
                 type: 'bar',
                 orientation: "h"
             }
         ];
-        // Bars are showing in ascending order *************** FIX ***
         var layout = {
             title: "TEST HBAR",
             // yaxis: (autorange = "reversed")
         }
         Plotly.newPlot("bar", barData, layout);
 
-        return [samplevalues, otuids, otulabels]
 
+
+        return [samplevalues, otuids, otulabels]
+        
 
     }).then(function ([samplevalues, otuids, otulabels]) {
         var trace1 = {
             x: otuids,
             y: samplevalues,
             mode: 'markers',
-            marker: { color: otulabels, size: samplevalues }
+            // color is fine. size could use some tweaking - marker size scale is greater than that of the graph
+            // i.e. a point that has a value of 650 is represented by a circle that is larger than 650 units on either axis
+            marker: { color: otuids, size: samplevalues }
         };
         var bubdata = [trace1];
         var layout = {
             title: 'TEST BUBBLE',
-            showlegend: false
+            showlegend: false,
+            yaxis: {range: [0,1.5*Math.max.apply(Math, samplevalues)]}
         };
         Plotly.newPlot('bubble', bubdata, layout)
+        console.log(Math.max.apply(Math, samplevalues))
+        console.log(samplevalues)
     });
 };
 init();
