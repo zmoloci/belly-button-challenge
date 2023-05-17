@@ -38,6 +38,7 @@ function updateData() {
     
     // build metadata dictionary
     let choicemeta = {}
+    // let choicemetadata = {}
 
     let otuids = []
 
@@ -52,6 +53,13 @@ function updateData() {
     d3.json(baseURL).then(function (data) {
         console.log(data)
 
+        // Clear child nodes from id="sample-metadata"
+        const list = document.getElementById("sample-metadata");
+        while (list.hasChildNodes()){
+            list.removeChild(list.firstChild)
+        }
+
+        // Build data arrays for visualizations:
         for (i = 0; i < data.samples.length; i++) {
             if (data.samples[i].id == id_choice) {
                 console.log(data.samples[i])
@@ -76,7 +84,7 @@ function updateData() {
                 if (data.metadata[i].id = id_choice){
                     // choicemeta.push(data.metadata[i])
                     choicemeta.age = data.metadata[i]["age"]
-                    choicemeta.bbytype = data.metadata[i]["bbtype"]
+                    choicemeta.bbtype = data.metadata[i]["bbtype"]
                     choicemeta.ethnicity = data.metadata[i]["ethnicity"]
                     choicemeta.gender = data.metadata[i]["gender"]
                     choicemeta.id = data.metadata[i]["id"]
@@ -94,18 +102,21 @@ function updateData() {
 
     }).then(function ([samplevalues, otuids, otulabels,samplevaluesdes,choicemeta]) {
         
-        // metadata section - probably should be moved into earlier section --- IN PROGRESS
+        // Build Metadata table based on user drop-down selection:
         var choicemetadata = document.getElementById("sample-metadata")
-        for (j = 0; j < 7; j++) {
-            var opt = choicemeta[j] + "is cool";
+
+        for (const [key, value] of Object.entries(choicemeta)){
+            var opt = key + ": " + value;
             var el = document.createElement("ul");
             el.textContent = opt;
             el.value = opt;
             choicemetadata.appendChild(el)
-        };
+        }
 
+        // Build horizontal bar chart using Plotly:
         let barData = [
             {
+                // Use arrays that have been sorted descending
                 x: samplevaluesdes,
                 y: otuidsbar,
                 type: 'bar',
@@ -113,28 +124,28 @@ function updateData() {
             }
         ];
         var layout = {
-            title: "TEST HBAR",
-            // yaxis: (autorange = "reversed")
+            title: "Microbial Species Concentrations for Test Subject ID No. " + choicemeta.id,
+
         }
         Plotly.newPlot("bar", barData, layout);
 
 
 
-        return [samplevalues, otuids, otulabels]
+        return [samplevalues, otuids]
         
 
-    }).then(function ([samplevalues, otuids, otulabels]) {
+    }).then(function ([samplevalues, otuids]) {
         var trace1 = {
             x: otuids,
             y: samplevalues,
             mode: 'markers',
             // color is fine. size could use some tweaking - marker size scale is greater than that of the graph
             // i.e. a point that has a value of 650 is represented by a circle that is larger than 650 units on either axis
-            marker: { color: otuids, size: samplevalues }
+            marker: { color: otuids, size: samplevalues}
         };
         var bubdata = [trace1];
         var layout = {
-            title: 'TEST BUBBLE',
+            title: "Microbial Species Concentrations for Test Subject ID No. " + choicemeta.id,
             showlegend: false,
             yaxis: {range: [0,1.5*Math.max.apply(Math, samplevalues)]}
         };
