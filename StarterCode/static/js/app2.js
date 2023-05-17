@@ -13,6 +13,9 @@ function init() {
             options.push(data.names[i])
         }
         console.log(options)
+        updateData()
+
+
         return options
     }).then(function (options) {
         var choices = document.getElementById("selDataset")
@@ -33,9 +36,12 @@ d3.selectAll("#selDataset").on("change", updateData);
 
 function updateData() {
     let dropdownMenu = d3.select("#selDataset")
-    let dataName = dropdownMenu.property("value");
+
+
+    let dataName = dropdownMenu.property("value") || "940";
+
     let samplevalues = []
-    
+
     // build metadata dictionary
     let choicemeta = {}
     // let choicemetadata = {}
@@ -55,7 +61,7 @@ function updateData() {
 
         // Clear child nodes from id="sample-metadata"
         const list = document.getElementById("sample-metadata");
-        while (list.hasChildNodes()){
+        while (list.hasChildNodes()) {
             list.removeChild(list.firstChild)
         }
 
@@ -81,14 +87,14 @@ function updateData() {
                         otulabels.push(data.samples[i].otu_labels[j])
                     }
                 }
-                if (data.metadata[i].id = id_choice){
+                if (data.metadata[i].id = id_choice) {
                     // choicemeta.push(data.metadata[i])
                     choicemeta.age = data.metadata[i]["age"]
                     choicemeta.bbtype = data.metadata[i]["bbtype"]
                     choicemeta.ethnicity = data.metadata[i]["ethnicity"]
                     choicemeta.gender = data.metadata[i]["gender"]
                     choicemeta.id = data.metadata[i]["id"]
-                    choicemeta.location = data.metadata[i]["location"] 
+                    choicemeta.location = data.metadata[i]["location"]
                     choicemeta.wfreq = data.metadata[i]["wfreq"]
                 }
             }
@@ -98,21 +104,26 @@ function updateData() {
         console.log(otulabels)
         console.log(samplevaluesdes)
         console.log(choicemeta[2])
-        return [samplevalues, otuids, otulabels,samplevaluesdes,choicemeta]
+        return [samplevalues, otuids, otulabels, samplevaluesdes, choicemeta]
 
-    }).then(function ([samplevalues, otuids, otulabels,samplevaluesdes,choicemeta]) {
-        
+    }).then(function ([samplevalues, otuids, otulabels, samplevaluesdes, choicemeta]) {
+
         // Build Metadata table based on user drop-down selection:
         var choicemetadata = document.getElementById("sample-metadata")
 
-        for (const [key, value] of Object.entries(choicemeta)){
+        for (const [key, value] of Object.entries(choicemeta)) {
             var opt = key + ": " + value;
             var el = document.createElement("ul");
             el.textContent = opt;
             el.value = opt;
             choicemetadata.appendChild(el)
         }
-
+        if (dataName == "init") {
+            chartTitle = "Choose ID Number from Dropdown";
+        }
+        else {
+            chartTitle = "Microbial Species Concentrations for Test Subject ID No. " + choicemeta.id
+        }
         // Build horizontal bar chart using Plotly:
         let barData = [
             {
@@ -124,7 +135,7 @@ function updateData() {
             }
         ];
         var layout = {
-            title: "Microbial Species Concentrations for Test Subject ID No. " + choicemeta.id,
+            title: chartTitle,
 
         }
         Plotly.newPlot("bar", barData, layout);
@@ -132,22 +143,23 @@ function updateData() {
 
 
         return [samplevalues, otuids]
-        
+
 
     }).then(function ([samplevalues, otuids]) {
         var trace1 = {
             x: otuids,
             y: samplevalues,
             mode: 'markers',
+            text: otulabels.map(i => "Species: " + i),
             // color is fine. size could use some tweaking - marker size scale is greater than that of the graph
             // i.e. a point that has a value of 650 is represented by a circle that is larger than 650 units on either axis
-            marker: { color: otuids, size: samplevalues}
+            marker: { color: otuids, size: samplevalues }
         };
         var bubdata = [trace1];
         var layout = {
-            title: "Microbial Species Concentrations for Test Subject ID No. " + choicemeta.id,
+            title: chartTitle,
             showlegend: false,
-            yaxis: {range: [0,1.5*Math.max.apply(Math, samplevalues)]}
+            yaxis: { range: [0, 1.5 * Math.max.apply(Math, samplevalues)] }
         };
         Plotly.newPlot('bubble', bubdata, layout)
         console.log(Math.max.apply(Math, samplevalues))
