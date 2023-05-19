@@ -37,3 +37,5 @@ This dashboard assists the user in visualizing Belly Button Biodiversity data. S
     - Main frontend index.html file containing dashboard.
 - [Readme.md](https://github.com/zmoloci/belly-button-challenge/blob/main/README.md)
     - This file.
+## References
+Hulcr, J. et al. (2012) A Jungle in There: Bacteria in Belly Buttons are Highly Diverse, but Predictable. Retrieved from: http://robdunnlab.com/projects/belly-button-biodiversity/results-and-data/
