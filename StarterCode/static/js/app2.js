@@ -73,7 +73,7 @@ function updateData() {
             if (data.samples[i].id == id_choice) {
                 // Uncomment below to show samples data in console:
                 // console.log(data.samples[i])
-                for (j = 0; j < 11; j++) {
+                for (j = 0; j < 10; j++) {
                     if (data.samples[i].sample_values[j]) {
                         // append sample_values to samplevalues array
                         samplevalues.push(data.samples[i].sample_values[j])
