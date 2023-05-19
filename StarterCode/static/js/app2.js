@@ -139,7 +139,9 @@ function updateData() {
                 x: samplevaluesdes,
                 y: otuidsbar,
                 type: 'bar',
-                orientation: "h"
+                orientation: "h",
+                text: otulabels
+            
             }
         ];
         var layout = {
