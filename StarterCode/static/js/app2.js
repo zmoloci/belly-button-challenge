@@ -12,9 +12,8 @@ function init() {
         for (i = 0; i < data.names.length; i++) {
             options.push(data.names[i])
         }
-        console.log(options)
+        // console.log(options)
         updateData()
-
 
         return options
     }).then(function (options) {
@@ -37,18 +36,18 @@ d3.selectAll("#selDataset").on("change", updateData);
 function updateData() {
     let dropdownMenu = d3.select("#selDataset")
 
-
-    let dataName = dropdownMenu.property("value") || "940";
+    let dataName = dropdownMenu.property("value");
 
     let samplevalues = []
 
     // build metadata dictionary
     let choicemeta = {}
-    // let choicemetadata = {}
 
+    // declare variables for arrays
     let otuids = []
 
     let otulabels = []
+    // id_choice looks to dropdownMenu selection
     let id_choice = dataName
 
     // define variables for descending bar chart
@@ -57,9 +56,13 @@ function updateData() {
 
 
     d3.json(baseURL).then(function (data) {
-        console.log(data)
+        // Uncomment next line to see data in console:
+        // console.log(data)
 
-        // Clear child nodes from id="sample-metadata"
+        // Clear child nodes from id="sample-metadata" to 
+        // ensure that metadata table does not grow with each
+        // user choice in dropdown - only current choice will
+        // be displayed.
         const list = document.getElementById("sample-metadata");
         while (list.hasChildNodes()) {
             list.removeChild(list.firstChild)
@@ -68,7 +71,8 @@ function updateData() {
         // Build data arrays for visualizations:
         for (i = 0; i < data.samples.length; i++) {
             if (data.samples[i].id == id_choice) {
-                console.log(data.samples[i])
+                // Uncomment below to show samples data in console:
+                // console.log(data.samples[i])
                 for (j = 0; j < 11; j++) {
                     if (data.samples[i].sample_values[j]) {
                         // append sample_values to samplevalues array
@@ -99,11 +103,12 @@ function updateData() {
                 }
             }
         }
-        console.log(samplevalues)
-        console.log(otuids)
-        console.log(otulabels)
-        console.log(samplevaluesdes)
-        console.log(choicemeta[2])
+        // uncomment console.log lines below to test data format/values:
+        // console.log(samplevalues)
+        // console.log(otuids)
+        // console.log(otulabels)
+        // console.log(samplevaluesdes)
+        // console.log(choicemeta[2])
         return [samplevalues, otuids, otulabels, samplevaluesdes, choicemeta]
 
     }).then(function ([samplevalues, otuids, otulabels, samplevaluesdes, choicemeta]) {
@@ -118,6 +123,9 @@ function updateData() {
             el.value = opt;
             choicemetadata.appendChild(el)
         }
+        // Show initial directions to user "Choose ID Number from Dropdown"
+        // until user selects an ID in the dropdown, then display ID selection
+        // as part of chart titles:
         if (dataName == "init") {
             chartTitle = "Choose ID Number from Dropdown";
         }
@@ -146,24 +154,29 @@ function updateData() {
 
 
     }).then(function ([samplevalues, otuids]) {
+        // Build trace for Bubble chart
         var trace1 = {
             x: otuids,
             y: samplevalues,
             mode: 'markers',
             text: otulabels.map(i => "Species: " + i),
-            // color is fine. size could use some tweaking - marker size scale is greater than that of the graph
-            // i.e. a point that has a value of 650 is represented by a circle that is larger than 650 units on either axis
+            // color is fine. size could use some tweaking - some marker size scale 
+            // are greater than that of the graph (i.e. a point that has a value of 650
+            // is represented by a circle that is larger than 650 units on either axis
             marker: { color: otuids, size: samplevalues }
         };
         var bubdata = [trace1];
         var layout = {
             title: chartTitle,
             showlegend: false,
+            // Dynamically adjust y-axis based on ID selected in dropdown (1.5x maximum samplevalue)
             yaxis: { range: [0, 1.5 * Math.max.apply(Math, samplevalues)] }
         };
         Plotly.newPlot('bubble', bubdata, layout)
-        console.log(Math.max.apply(Math, samplevalues))
-        console.log(samplevalues)
+        // Uncomment the following two lines to test samplevalues and y-axis scaling:
+        // console.log(Math.max.apply(Math, samplevalues))
+        // console.log(samplevalues)
     });
 };
+// Init function to load bar and bubble chart axes and instructions
 init();
